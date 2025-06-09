@@ -11,7 +11,7 @@ use Drupal\commerce_price\Price;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\commerce_price\NumberFormatterFactoryInterface;
+use Drupal\commerce_price\NumberFormatter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -20,25 +20,35 @@ use Andrejbarna\DemoPhpApiClient\Exception\ApiException;
 use Drupal\commerce_payment\Exception\PaymentGatewayException;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentType\PaymentTypeManagerInterface;
 use Drupal\commerce_payment\PaymentMethodTypeManager;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\commerce_payment\Attribute\CommercePaymentGateway;
 
 /**
  * Provides the Andrejbarna payment gateway.
- *
- * @CommercePaymentGateway(
- *   id = "andrejbarna_custom_payment_gateway",
- *   label = @Translation("Andrejbarna Custom Payment Gateway"),
- *   display_label = @Translation("Custom Payment"),
- *   forms = {
- *     "offsite-payment" = "Drupal\andrejbarna_custom_payment_gateway\PluginForm\OffsiteRedirectForm",
- *   },
- * )
  */
+#[CommercePaymentGateway(
+  id: "andrejbarna_custom_payment_gateway",
+  label: new TranslatableMarkup("Andrejbarna Custom Payment Gateway"),
+  display_label: new TranslatableMarkup("Custom Payment"),
+  forms: [
+    "offsite-payment" => "Drupal\andrejbarna_custom_payment_gateway\PluginForm\OffsiteRedirectForm",
+  ],
+  modes: [
+    "test" => new TranslatableMarkup("Test"),
+    "live" => new TranslatableMarkup("Live"),
+  ],
+  payment_method_types: ["credit_card"],
+  credit_card_types: [
+    "visa", "mastercard", "amex", "discover"
+  ],
+  requires_billing_information: TRUE,
+)]
 class AndrejbarnaCustomPaymentGateway extends OffsitePaymentGatewayBase {
 
   /**
    * The number formatter.
    *
-   * @var \CommerceGuys\Intl\Formatter\NumberFormatterInterface
+   * @var \Drupal\commerce_price\NumberFormatter
    */
   protected $numberFormatter;
 
@@ -52,13 +62,16 @@ class AndrejbarnaCustomPaymentGateway extends OffsitePaymentGatewayBase {
     EntityTypeManagerInterface $entity_type_manager,
     PaymentTypeManager $payment_type_manager,
     PaymentMethodTypeManager $payment_method_type_manager,
-    NumberFormatterFactoryInterface $number_formatter_factory,
+    NumberFormatter $number_formatter,
     TimeInterface $time
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $payment_type_manager, $payment_method_type_manager, $time);
-    $this->numberFormatter = $number_formatter_factory->createInstance();
+    $this->numberFormatter = $number_formatter;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
       $configuration,
@@ -67,7 +80,7 @@ class AndrejbarnaCustomPaymentGateway extends OffsitePaymentGatewayBase {
       $container->get('entity_type.manager'),
       $container->get('plugin.manager.commerce_payment_type'),
       $container->get('plugin.manager.commerce_payment_method_type'),
-      $container->get('commerce_price.number_formatter_factory'),
+      $container->get('commerce_price.number_formatter'),
       $container->get('datetime.time')
     );
   }
@@ -78,19 +91,21 @@ class AndrejbarnaCustomPaymentGateway extends OffsitePaymentGatewayBase {
   public function defaultConfiguration() {
     return [
       'api_key' => '',
+      'mode' => 'test',
+      'display_label' => 'Custom Payment',
+      'collect_billing_information' => TRUE,
+      'payment_method_types' => ['credit_card'],
     ] + parent::defaultConfiguration();
   }
 
   /**
    * {@inheritdoc}
    */
- 
-
-  /**
-   * {@inheritdoc}
-   */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildConfigurationForm($form, $form_state);
+
+    // Ensure configuration values are set
+    $this->configuration = $this->defaultConfiguration() + $this->configuration;
 
     $form['api_key'] = [
       '#type' => 'textfield',
@@ -111,6 +126,9 @@ class AndrejbarnaCustomPaymentGateway extends OffsitePaymentGatewayBase {
     if (!$form_state->getErrors()) {
       $values = $form_state->getValue($form['#parents']);
       $this->configuration['api_key'] = $values['api_key'];
+      $this->configuration['mode'] = $values['mode'];
+      $this->configuration['display_label'] = $values['display_label'];
+      $this->configuration['collect_billing_information'] = $values['collect_billing_information'];
     }
   }
 
@@ -130,10 +148,10 @@ class AndrejbarnaCustomPaymentGateway extends OffsitePaymentGatewayBase {
       'order_id' => $order->id(),
       'remote_id' => $request->query->get('payment_id', ''),
       'remote_state' => 'completed',
+      'amount' => $order->getTotalPrice(),
+      'payment_gateway_mode' => $this->getMode(),
     ]);
     
-    // Set the amount explicitly using the Price object
-    $payment->setAmount(new Price($total_price->getNumber(), $total_price->getCurrencyCode()));
     $payment->save();
     
     // Set the order state to completed
@@ -173,5 +191,4 @@ class AndrejbarnaCustomPaymentGateway extends OffsitePaymentGatewayBase {
       throw new PaymentGatewayException($this->t('Unable to get rate. Please try again later.'));
     }
   }
-
 } 

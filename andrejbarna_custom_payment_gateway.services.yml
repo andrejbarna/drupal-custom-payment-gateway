@@ -3,3 +3,9 @@ services:
     class: Drupal\andrejbarna_custom_payment_gateway\Plugin\Commerce\PaymentGateway\AndrejbarnaCustomPaymentGateway
     tags:
       - { name: commerce_payment_gateway }
+  plugin.manager.commerce_payment_gateway:
+    class: Drupal\commerce_payment\PaymentGatewayManager
+    parent: default_plugin_manager
+    arguments: ['@container.namespaces', '@cache.discovery', '@module_handler', '@entity_type.manager', '@plugin.manager.commerce_payment_type', '@plugin.manager.commerce_payment_method_type']
+    tags:
+      - { name: plugin_manager_cache_clear }

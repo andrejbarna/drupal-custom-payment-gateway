@@ -1,9 +1,8 @@
 name: Andrejbarna Custom Payment Gateway
 type: module
-description: 'Andrejbarna custom payment gateway with API integration for Drupal Commerce'
-core_version_requirement: ^9 || ^10 || ^11
-package: Commerce (contrib)
+description: 'Provides a custom payment gateway for Andrejbarna.'
+package: Commerce
+core_version_requirement: ^9 || ^10
 dependencies:
   - commerce:commerce_payment
-  - commerce:commerce_price
-  - commerce:commerce_order
+  - commerce:commerce_checkout

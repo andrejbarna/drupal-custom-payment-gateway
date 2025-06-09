@@ -1,0 +1,113 @@
+<?php
+
+/**
+ * @file
+ * Contains andrejbarna_custom_payment_gateway.module.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\commerce_checkout\Plugin\Commerce\CheckoutFlow\CheckoutFlowWithPanesInterface;
+use Drupal\commerce_checkout\Plugin\Commerce\CheckoutPane\CheckoutPaneInterface;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Ajax\MessageCommand;
+use Drupal\commerce_order\Entity\OrderInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function andrejbarna_custom_payment_gateway_theme() {
+  return [
+    'andrejbarna_custom_payment_gateway_rate' => [
+      'variables' => [
+        'rate' => NULL,
+        'currency' => NULL,
+        'amount' => NULL,
+        'formatted_amount' => NULL,
+      ],
+      'template' => 'andrejbarna-custom-payment-gateway-rate',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function andrejbarna_custom_payment_gateway_form_commerce_checkout_flow_review_alter(&$form, FormStateInterface $form_state, $form_id) {
+  /** @var \Drupal\commerce_checkout\Plugin\Commerce\CheckoutFlow\CheckoutFlowWithPanesInterface $checkout_flow */
+  $checkout_flow = $form_state->getFormObject();
+  if (!$checkout_flow instanceof CheckoutFlowWithPanesInterface) {
+    return;
+  }
+
+  /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
+  $order = $form_state->get('order');
+  if (!$order instanceof OrderInterface) {
+    return;
+  }
+
+  // Add the rate button
+  $form['rate_button'] = [
+    '#type' => 'button',
+    '#value' => t('Get Rate'),
+    '#name' => 'get_rate',
+    '#ajax' => [
+      'callback' => 'andrejbarna_custom_payment_gateway_get_rate_callback',
+      'wrapper' => 'payment-information',
+      'progress' => [
+        'type' => 'throbber',
+        'message' => t('Getting rate...'),
+      ],
+    ],
+  ];
+
+  // Add a container for the rate information
+  $form['rate_information'] = [
+    '#type' => 'container',
+    '#attributes' => [
+      'id' => 'rate-information',
+    ],
+  ];
+}
+
+/**
+ * Ajax callback for the Get Rate button.
+ */
+function andrejbarna_custom_payment_gateway_get_rate_callback(array &$form, FormStateInterface $form_state) {
+  $response = new AjaxResponse();
+  
+  /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
+  $order = $form_state->get('order');
+  if (!$order instanceof OrderInterface) {
+    $response->addCommand(new MessageCommand(t('Order not found.'), '#rate-information', ['type' => 'error']));
+    return $response;
+  }
+
+  try {
+    // Get the payment gateway
+    $payment_gateway = $order->get('payment_gateway')->entity;
+    if (!$payment_gateway) {
+      $response->addCommand(new MessageCommand(t('Payment gateway not found.'), '#rate-information', ['type' => 'error']));
+      return $response;
+    }
+
+    // Get the rate
+    $rate_info = $payment_gateway->getPlugin()->getRate($order);
+    
+    // Build the rate information markup
+    $rate_markup = [
+      '#theme' => 'andrejbarna_custom_payment_gateway_rate',
+      '#rate' => $rate_info['rate'],
+      '#currency' => $rate_info['currency'],
+      '#amount' => $rate_info['amount'],
+      '#formatted_amount' => $rate_info['formatted_amount'],
+    ];
+    
+    $response->addCommand(new ReplaceCommand('#rate-information', \Drupal::service('renderer')->render($rate_markup)));
+  }
+  catch (\Exception $e) {
+    $response->addCommand(new MessageCommand($e->getMessage(), '#rate-information', ['type' => 'error']));
+  }
+  
+  return $response;
+} 

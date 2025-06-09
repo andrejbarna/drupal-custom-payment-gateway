@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - andrejbarna_custom_payment_gateway
+id: andrejbarna_custom_payment_gateway
+label: 'Andrejbarna Custom Payment Gateway'
+weight: null
+plugin: andrejbarna_custom_payment_gateway
+configuration:
+  api_key: ''
+  display_label: 'Custom Payment'
+  mode: test
+  payment_method_types:
+    - credit_card
+  collect_billing_information: true
+conditions: {  }
+conditionOperator: AND 

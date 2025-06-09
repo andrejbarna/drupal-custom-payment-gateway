@@ -34,3 +34,12 @@ payment_rate:
     - core/jquery
     - core/drupal
     - core/drupalSettings 
+
+checkout:
+  version: 1.x
+  js:
+    js/checkout.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once 

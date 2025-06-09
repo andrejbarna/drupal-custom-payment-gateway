@@ -1,0 +1,19 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display rate information.
+ *
+ * Available variables:
+ * - rate: The exchange rate.
+ * - currency: The currency code.
+ * - amount: The converted amount.
+ * - formatted_amount: The formatted amount with currency symbol.
+ */
+#}
+<div class="rate-information">
+  <h3>{{ 'Exchange Rate Information'|t }}</h3>
+  <div class="rate-details">
+    <p>{{ 'Exchange Rate:'|t }} {{ rate }}</p>
+    <p>{{ 'Converted Amount:'|t }} {{ formatted_amount }}</p>
+  </div>
+</div> 

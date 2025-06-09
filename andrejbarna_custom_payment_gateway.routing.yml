@@ -20,3 +20,15 @@ andrejbarna_custom_payment_gateway.get_rate:
   methods: [POST]
   options:
     no_cache: TRUE 
+
+andrejbarna_custom_payment_gateway.rate:
+  path: '/payment/rate/{commerce_order}'
+  defaults:
+    _controller: '\Drupal\andrejbarna_custom_payment_gateway\Controller\RateController::getRate'
+    _title: 'Get Payment Rate'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      commerce_order:
+        type: entity:commerce_order 

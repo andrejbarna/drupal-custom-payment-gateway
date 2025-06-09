@@ -6,6 +6,7 @@ use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\commerce_payment\PaymentStorageInterface;
+use Drupal\commerce_checkout\CheckoutOrderManagerInterface;
 
 /**
  * Controller for payment completion.
@@ -20,13 +21,23 @@ class PaymentCompleteController extends ControllerBase {
   protected $paymentStorage;
 
   /**
+   * The checkout order manager.
+   *
+   * @var \Drupal\commerce_checkout\CheckoutOrderManagerInterface
+   */
+  protected $checkoutOrderManager;
+
+  /**
    * Constructs a new PaymentCompleteController object.
    *
    * @param \Drupal\commerce_payment\PaymentStorageInterface $payment_storage
    *   The payment storage.
+   * @param \Drupal\commerce_checkout\CheckoutOrderManagerInterface $checkout_order_manager
+   *   The checkout order manager.
    */
-  public function __construct(PaymentStorageInterface $payment_storage) {
+  public function __construct(PaymentStorageInterface $payment_storage, CheckoutOrderManagerInterface $checkout_order_manager) {
     $this->paymentStorage = $payment_storage;
+    $this->checkoutOrderManager = $checkout_order_manager;
   }
 
   /**
@@ -34,7 +45,8 @@ class PaymentCompleteController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity_type.manager')->getStorage('commerce_payment')
+      $container->get('entity_type.manager')->getStorage('commerce_payment'),
+      $container->get('commerce_checkout.checkout_order_manager')
     );
   }
 
@@ -64,10 +76,8 @@ class PaymentCompleteController extends ControllerBase {
       $commerce_order->save();
     }
 
-    return [
-      '#theme' => 'commerce_checkout_complete',
-      '#order_entity' => $commerce_order,
-    ];
+    // Redirect to the checkout complete page
+    return $this->checkoutOrderManager->completeCheckout($commerce_order);
   }
 
 } 

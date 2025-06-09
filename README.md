@@ -12,7 +12,7 @@ A custom payment gateway module for Drupal Commerce that integrates with the And
 ## Requirements
 
 - Drupal 9, 10, or 11
-- Drupal Commerce 2.x or 3.x
+- Drupal Commerce 3.x
 - PHP 8.1 or higher
 - [Andrejbarna Demo PHP API Client](https://packagist.org/packages/andrejbarna/demo-php-api-client)
 
