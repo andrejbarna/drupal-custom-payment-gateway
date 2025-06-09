@@ -1,0 +1,20 @@
+{
+    "name": "andrejbarna/custom-payment-gateway",
+    "description": "Custom payment gateway integration for Drupal Commerce",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Andrej Barna",
+            "role": "Maintainer"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "drupal/core": "^9 || ^10",
+        "drupal/commerce": "^2",
+        "andrejbarna/demo-php-api-client": "dev-main"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

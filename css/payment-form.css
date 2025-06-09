@@ -1,0 +1,110 @@
+#payment-rate-wrapper {
+  margin: 20px 0;
+  padding: 15px;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.form-submit[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.payment-form-container {
+  max-width: 600px;
+  margin: 2em auto;
+  padding: 2em;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.payment-form-container .form-item {
+  margin-bottom: 1.5em;
+}
+
+#js-original-amount {
+  margin-bottom: 1.5em;
+  padding: 1em;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+#js-original-amount label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  color: #495057;
+}
+
+#js-original-amount .field__item {
+  font-size: 1.2em;
+  color: #212529;
+}
+
+.payment-form-container .button {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 0.5em 0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.payment-form-container .button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rate-display-container {
+  margin: 1.5em 0;
+  padding: 1em;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.rate-display-container.hidden {
+  display: none;
+}
+
+.rate-info {
+  color: #2c3e50;
+}
+
+.rate-info p {
+  margin: 0.5em 0;
+}
+
+.rate-error {
+  color: #e74c3c;
+  padding: 1em;
+  background: #fde8e8;
+  border-radius: 4px;
+}
+
+.rate-error p {
+  margin: 0;
+}
+
+#js-get-rate {
+  background: #3498db;
+  color: white;
+  border: none;
+}
+
+#js-get-rate:hover:not([disabled]) {
+  background: #2980b9;
+}
+
+#js-pay-now {
+  background: #2ecc71;
+  color: white;
+  border: none;
+  width: 100%;
+}
+
+#js-pay-now:hover:not([disabled]) {
+  background: #27ae60;
+} 

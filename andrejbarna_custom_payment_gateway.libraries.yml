@@ -1,0 +1,36 @@
+payment_modal:
+  version: 1.x
+  js:
+    js/payment-modal.js: {}
+  css:
+    theme:
+      css/payment-modal.css: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - core/drupal.dialog
+    - core/drupal.dialog.ajax 
+
+payment_form:
+  version: 1.x
+  css:
+    theme:
+      css/payment-form.css: {}
+  js:
+    js/payment-form.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+    - core/drupalSettings
+
+payment_rate:
+  version: 1.x
+  js:
+    js/payment-rate.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings 

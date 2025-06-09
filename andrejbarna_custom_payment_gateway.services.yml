@@ -1,0 +1,5 @@
+services:
+  andrejbarna_custom_payment_gateway.gateway:
+    class: Drupal\andrejbarna_custom_payment_gateway\Plugin\Commerce\PaymentGateway\AndrejbarnaCustomPaymentGateway
+    tags:
+      - { name: commerce_payment_gateway }
