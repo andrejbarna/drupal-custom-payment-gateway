@@ -13,7 +13,7 @@ A custom payment gateway module for Drupal Commerce that integrates with the And
 
 - Drupal Commerce 2.x or higher
 - PHP 8.1 or higher
-- [Andrejbarna Demo PHP API Client](https://github.com/andrejbarna/demo-php-api-client)
+- [Andrejbarna Demo PHP API Client](https://packagist.org/packages/andrejbarna/demo-php-api-client)
 
 ## Installation
 
@@ -25,7 +25,7 @@ A custom payment gateway module for Drupal Commerce that integrates with the And
     "repositories": {
         "andrejbarna_custom_payment_gateway": {
             "type": "vcs",
-            "url": "YOUR_GIT_REPOSITORY_URL"
+            "url": "https://github.com/andrejbarna/drupal-custom-payment-gateway.git"
         }
     }
 }
@@ -43,9 +43,10 @@ drush en andrejbarna_custom_payment_gateway
 
 ### Manual Installation (Not Recommended)
 
-1. Download and place the module in your `web/modules` directory
-2. Run `composer update` to install dependencies
-3. Enable the module using Drush or the Drupal UI
+1. Download the module from [GitHub](https://github.com/andrejbarna/drupal-custom-payment-gateway)
+2. Place it in your `web/modules` directory
+3. Run `composer update` to install dependencies
+4. Enable the module using Drush or the Drupal UI
 
 ## Configuration
 
@@ -73,21 +74,31 @@ Common issues and solutions:
 1. **"Payment gateway not found" error**
    - Ensure the module is properly enabled
    - Check if the payment gateway is configured in Commerce settings
+   - Verify the gateway configuration exists in the database
 
 2. **"API key not configured" error**
    - Verify your API key in the payment gateway configuration
    - Ensure the API key has the correct permissions
+   - Check if the API key is properly saved in the configuration
 
 3. **Rate calculation fails**
    - Check your API key permissions
    - Verify the currency code is supported
    - Check the Drupal error logs for detailed information
+   - Ensure the API endpoint is accessible from your server
 
 ## Support
 
 For issues and support:
-- Create an issue in the GitHub repository
+- Create an issue in the [GitHub repository](https://github.com/andrejbarna/drupal-custom-payment-gateway/issues)
 - Contact your Andrejbarna account manager
+
+## Development
+
+To contribute to the module:
+1. Fork the [repository](https://github.com/andrejbarna/drupal-custom-payment-gateway)
+2. Create a feature branch
+3. Submit a pull request
 
 ## License
 
