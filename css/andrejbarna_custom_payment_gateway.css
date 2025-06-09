@@ -1,0 +1,23 @@
+.get-rate-button {
+  margin-bottom: 1em;
+}
+
+.rate-information {
+  background-color: #f5f5f5;
+  padding: 1em;
+  margin-bottom: 1em;
+  border-radius: 4px;
+}
+
+.rate-information h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.rate-details {
+  margin-top: 0.5em;
+}
+
+.rate-details p {
+  margin: 0.5em 0;
+} 

@@ -37,6 +37,9 @@ payment_rate:
 
 checkout:
   version: 1.x
+  css:
+    theme:
+      css/andrejbarna_custom_payment_gateway.css: {}
   js:
     js/checkout.js: {}
   dependencies:

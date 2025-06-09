@@ -33,41 +33,69 @@ function andrejbarna_custom_payment_gateway_theme() {
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function andrejbarna_custom_payment_gateway_form_commerce_checkout_flow_review_alter(&$form, FormStateInterface $form_state, $form_id) {
-  /** @var \Drupal\commerce_checkout\Plugin\Commerce\CheckoutFlow\CheckoutFlowWithPanesInterface $checkout_flow */
-  $checkout_flow = $form_state->getFormObject();
-  if (!$checkout_flow instanceof CheckoutFlowWithPanesInterface) {
-    return;
+function andrejbarna_custom_payment_gateway_form_commerce_checkout_flow_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $route_match = \Drupal::routeMatch();
+  if ($route_match->getRouteName() === 'commerce_checkout.form') {
+    $step_id = $route_match->getParameter('step');
+    if ($step_id === 'review') {
+      /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
+      $order = $form_state->get('order');
+      if (!$order instanceof OrderInterface) {
+        return;
+      }
+
+      // Attach our library
+      $form['#attached']['library'][] = 'andrejbarna_custom_payment_gateway/checkout';
+
+      // Add the rate button before the payment buttons
+      $form['rate_button'] = [
+        '#type' => 'button',
+        '#value' => t('Get Rate'),
+        '#name' => 'get_rate',
+        '#weight' => -1,
+        '#attributes' => [
+          'class' => ['button', 'button--primary', 'get-rate-button'],
+        ],
+        '#ajax' => [
+          'callback' => 'andrejbarna_custom_payment_gateway_get_rate_callback',
+          'wrapper' => 'rate-information',
+          'progress' => [
+            'type' => 'throbber',
+            'message' => t('Getting rate...'),
+          ],
+        ],
+      ];
+
+      // Add a container for the rate information
+      $form['rate_information'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'id' => 'rate-information',
+        ],
+        '#weight' => -1,
+      ];
+
+      // Disable the payment buttons initially
+      if (isset($form['actions']['next'])) {
+        $form['actions']['next']['#attributes']['disabled'] = 'disabled';
+        $form['actions']['next']['#attributes']['class'][] = 'payment-button';
+      }
+
+      // Add our submit handler
+      $form['#validate'][] = 'andrejbarna_custom_payment_gateway_checkout_form_validate';
+    }
   }
+}
 
-  /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
-  $order = $form_state->get('order');
-  if (!$order instanceof OrderInterface) {
-    return;
+/**
+ * Form validation handler for the checkout form.
+ */
+function andrejbarna_custom_payment_gateway_checkout_form_validate($form, FormStateInterface $form_state) {
+  // Check if rate was obtained
+  $rate_obtained = \Drupal::state()->get('andrejbarna_custom_payment_gateway_rate_obtained');
+  if (!$rate_obtained) {
+    $form_state->setError('rate_button', t('Please get the exchange rate before proceeding.'));
   }
-
-  // Add the rate button
-  $form['rate_button'] = [
-    '#type' => 'button',
-    '#value' => t('Get Rate'),
-    '#name' => 'get_rate',
-    '#ajax' => [
-      'callback' => 'andrejbarna_custom_payment_gateway_get_rate_callback',
-      'wrapper' => 'payment-information',
-      'progress' => [
-        'type' => 'throbber',
-        'message' => t('Getting rate...'),
-      ],
-    ],
-  ];
-
-  // Add a container for the rate information
-  $form['rate_information'] = [
-    '#type' => 'container',
-    '#attributes' => [
-      'id' => 'rate-information',
-    ],
-  ];
 }
 
 /**
@@ -103,9 +131,15 @@ function andrejbarna_custom_payment_gateway_get_rate_callback(array &$form, Form
       '#formatted_amount' => $rate_info['formatted_amount'],
     ];
     
+    // Store that we got the rate
+    \Drupal::state()->set('andrejbarna_custom_payment_gateway_rate_obtained', TRUE);
+    
+    // Enable the payment buttons
     $response->addCommand(new ReplaceCommand('#rate-information', \Drupal::service('renderer')->render($rate_markup)));
+    $response->addCommand(new \Drupal\Core\Ajax\InvokeCommand('.payment-button', 'removeAttr', ['disabled']));
   }
   catch (\Exception $e) {
+    \Drupal::state()->set('andrejbarna_custom_payment_gateway_rate_obtained', FALSE);
     $response->addCommand(new MessageCommand($e->getMessage(), '#rate-information', ['type' => 'error']));
   }
   
